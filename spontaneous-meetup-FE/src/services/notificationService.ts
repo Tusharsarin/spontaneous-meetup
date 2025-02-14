@@ -1,5 +1,5 @@
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, onSnapshot, collection } from "firebase/firestore";
 import { app, auth, db } from '../firebase'; // Import from your existing firebase.ts
 
 const API_URL = 'http://localhost:5000/api';
@@ -81,7 +81,8 @@ export const NotificationService = {
 
       await setDoc(doc(db, 'users', userId), {
         fcmToken: token,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        userId: userId
       }, { merge: true });
       
       console.log('FCM token stored successfully for user:', userId);
@@ -172,5 +173,23 @@ export const NotificationService = {
       console.error("Error sending multiple notifications:", error);
       throw error;
     }
+  },
+
+  listenForNotifications(userId: string, callback: (notification: any) => void) {
+    // Listen to user's notifications collection
+    return onSnapshot(
+      collection(db, 'users', userId, 'notifications'),
+      (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+          if (change.type === 'added') {
+            const notification = change.doc.data();
+            callback(notification);
+          }
+        });
+      },
+      (error) => {
+        console.error("Error listening to notifications:", error);
+      }
+    );
   }
 }; 

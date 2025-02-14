@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
-import { NotificationService } from "./services/notificationService";
+// import { NotificationService } from "./services/notificationService";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -28,13 +28,31 @@ const messaging = getMessaging(app);
 const signInWithGoogle = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
-    // Request notification permission right after successful login
-    if (result.user) {
+    
+    // Generate FCM token only if notifications are supported and not blocked
+    if (result.user && 'Notification' in window && Notification.permission !== 'denied') {
       try {
-        const token = await NotificationService.requestPermission();
-        console.log('Notification permission granted and token stored:', token);
+        // Request permission first
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const currentToken = await getToken(messaging, {
+            vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY
+          });
+
+          if (currentToken) {
+            await setDoc(doc(db, 'users', result.user.uid), {
+              fcmToken: currentToken,
+              email: result.user.email,
+              displayName: result.user.displayName,
+              photoURL: result.user.photoURL,
+              lastLogin: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+          }
+        }
       } catch (err) {
-        console.error('Error setting up notifications:', err);
+        // Don't throw error if notifications are blocked
+        console.log('Notifications not available:', err);
       }
     }
     return result.user;
