@@ -6,7 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import { specs } from './swagger.js';
 import { db } from './firebase-config.js';
 import notificationRoutes from './src/routes/notificationRoutes.js';
-
+import requestRoutes from './src/routes/requestRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -29,6 +29,7 @@ app.use(cors());
 app.get("/", (req, res) => res.send("API is running 🚀"));
 app.use("/api", broadcastRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/requests', requestRoutes);
 
 // Start Server
 app.listen(port, () => console.log(`Server running on port ${port}`));

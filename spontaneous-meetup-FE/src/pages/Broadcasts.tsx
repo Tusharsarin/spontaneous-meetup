@@ -7,6 +7,8 @@ import { onSnapshot, collection } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNotifications } from '../components/NotificationProvider';
 import { NotificationService } from '../services/notificationService';
+import { RequestService } from '../services/requestService';
+import { BroadcastRequests } from '../components/BroadcastRequests';
 
 interface Broadcast {
   id: string;
@@ -20,6 +22,7 @@ interface Broadcast {
   createdBy?: string;
   creatorName?: string;
   createdAt?: string;
+  joinRequests?: { userId: string; userName: string; status: string; createdAt: string }[];
 }
 
 const Broadcasts = () => {
@@ -28,6 +31,7 @@ const Broadcasts = () => {
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [processingJoinIds, setProcessingJoinIds] = useState<string[]>([]);
 
   console.log("Broadcasts component rendered", { user, loading });
 
@@ -60,7 +64,8 @@ const Broadcasts = () => {
               participants: data.participants || [],
               createdBy: data.createdBy || '',
               creatorName: data.creatorName || 'Anonymous',
-              createdAt: data.createdAt || ''
+              createdAt: data.createdAt || '',
+              joinRequests: data.joinRequests || []
             } as Broadcast;
           });
           console.log("Broadcasts data:", broadcastsData);
@@ -87,31 +92,38 @@ const Broadcasts = () => {
     }
 
     try {
-      const broadcast = broadcasts.find(b => b.id === broadcastId);
-      if (!broadcast) return;
-
-      await axios.post(`http://localhost:5000/api/broadcasts/${broadcastId}/join`, {
-        userId: user.uid,
-        userName: user.displayName || 'Anonymous'
-      });
-
-      // Notify broadcast creator
-      await NotificationService.sendNotification(
-        broadcast.createdBy!,
-        "New Join Request",
-        `${user.displayName || 'Anonymous'} has joined your broadcast for ${broadcast.activity}`
-      );
-
-      // Notify the joiner
-      await NotificationService.sendNotification(
+      setProcessingJoinIds(prev => [...prev, broadcastId]);
+      await RequestService.createRequest(
         user.uid,
-        "Successfully Joined",
-        `You have joined the broadcast: ${broadcast.activity}`
+        user.displayName || 'Anonymous',
+        broadcastId
       );
 
-    } catch (error: any) {
-      console.error("Error joining broadcast:", error);
-      alert(error.response?.data?.error || "Error joining broadcast");
+      // Update the local state to reflect the pending request immediately
+      setBroadcasts(prevBroadcasts => 
+        prevBroadcasts.map(broadcast => {
+          if (broadcast.id === broadcastId) {
+            return {
+              ...broadcast,
+              joinRequests: [
+                ...(broadcast.joinRequests || []),
+                {
+                  userId: user.uid,
+                  userName: user.displayName || 'Anonymous',
+                  status: 'pending',
+                  createdAt: new Date().toISOString()
+                }
+              ]
+            };
+          }
+          return broadcast;
+        })
+      );
+
+    } catch (error) {
+      console.error("Error requesting to join broadcast:", error);
+    } finally {
+      setProcessingJoinIds(prev => prev.filter(id => id !== broadcastId));
     }
   };
 
@@ -160,6 +172,13 @@ const Broadcasts = () => {
     } catch (error) {
       console.error("Error deleting broadcast:", error);
     }
+  };
+
+  // Helper function to get user's request status
+  const getUserRequestStatus = (broadcast: Broadcast, userId: string | undefined) => {
+    if (!userId) return null;
+    const request = broadcast.joinRequests?.find(r => r.userId === userId);
+    return request?.status || null;
   };
 
   if (loading) {
@@ -248,29 +267,62 @@ const Broadcasts = () => {
                     >
                       Delete Broadcast
                     </button>
-                  ) : user && broadcast?.participants?.some(p => p.userId === user.uid) ? (
-                    <button
-                      onClick={() => handleLeave(broadcast.id)}
-                      className="w-full py-2 px-4 rounded-lg font-semibold bg-yellow-500 text-white hover:bg-yellow-600 transition-all duration-300"
-                    >
-                      Leave Activity
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleJoin(broadcast.id)}
-                      className={`w-full py-2 px-4 rounded-lg font-semibold transition-all duration-300 
-                        ${((broadcast?.participants?.length || 0) >= (broadcast?.maxParticipants || 0))
-                          ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                          : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105'
-                        }`}
-                      disabled={(broadcast?.participants?.length || 0) >= (broadcast?.maxParticipants || 0)}
-                    >
-                      {(broadcast?.participants?.length || 0) >= (broadcast?.maxParticipants || 0)
-                        ? "Full" 
-                        : "Join Activity"}
-                    </button>
-                  )}
+                  ) : (() => {
+                    const requestStatus = getUserRequestStatus(broadcast, user?.uid);
+                    const isParticipant = broadcast?.participants?.some(p => p.userId === user?.uid);
+                    const isFull = (broadcast?.participants?.length || 0) >= (broadcast?.maxParticipants || 0);
+
+                    if (isParticipant) {
+                      return (
+                        <button
+                          onClick={() => handleLeave(broadcast.id)}
+                          className="w-full py-2 px-4 rounded-lg font-semibold bg-yellow-500 text-white hover:bg-yellow-600 transition-all duration-300"
+                        >
+                          Leave Activity
+                        </button>
+                      );
+                    }
+
+                    if (requestStatus === 'pending') {
+                      return (
+                        <button
+                          disabled
+                          className="w-full py-2 px-4 rounded-lg font-semibold bg-yellow-400 text-white cursor-not-allowed transition-all duration-300"
+                        >
+                          Requested
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <button
+                        onClick={() => handleJoin(broadcast.id)}
+                        className={`w-full py-2 px-4 rounded-lg font-semibold transition-all duration-300 
+                          ${processingJoinIds.includes(broadcast.id)
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : isFull
+                              ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                              : requestStatus === 'rejected'
+                                ? 'bg-red-500 text-white hover:bg-red-600'
+                                : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105'
+                          }`}
+                        disabled={processingJoinIds.includes(broadcast.id) || isFull}
+                      >
+                        {processingJoinIds.includes(broadcast.id)
+                          ? "Requesting..."
+                          : isFull
+                            ? "Full"
+                            : requestStatus === 'rejected'
+                              ? "Request Again"
+                              : "Join Activity"}
+                      </button>
+                    );
+                  })()}
                 </div>
+
+                {broadcast.createdBy === user?.uid && (
+                  <BroadcastRequests broadcastId={broadcast.id} />
+                )}
               </div>
             </div>
           ))}
