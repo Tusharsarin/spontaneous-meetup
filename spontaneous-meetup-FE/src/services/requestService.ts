@@ -1,8 +1,8 @@
 import axios from 'axios';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export interface Request {
   id: string;
@@ -16,10 +16,15 @@ export interface Request {
 export const RequestService = {
   async createRequest(userId: string, userName: string, broadcastId: string) {
     try {
+      const token = await auth.currentUser?.getIdToken();
       const response = await axios.post(`${API_URL}/requests`, {
         userId,
         userName,
         broadcastId
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       return response.data;
     } catch (error) {
@@ -29,6 +34,11 @@ export const RequestService = {
   },
 
   listenToRequests(broadcastId: string, callback: (requests: Request[]) => void) {
+    if (!auth.currentUser) {
+      console.error('User must be authenticated');
+      return () => {};
+    }
+
     const requestsQuery = query(
       collection(db, 'requests'),
       where('broadcastId', '==', broadcastId),
@@ -46,8 +56,13 @@ export const RequestService = {
 
   async handleRequest(requestId: string, status: 'accepted' | 'rejected') {
     try {
+      const token = await auth.currentUser?.getIdToken();
       const response = await axios.put(`${API_URL}/requests/${requestId}`, {
         status
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       return response.data;
     } catch (error) {

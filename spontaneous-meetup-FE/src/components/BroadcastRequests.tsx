@@ -44,7 +44,7 @@ export const BroadcastRequests = ({ broadcastId }: Props) => {
   const handleRequest = async (userId: string, status: 'approved' | 'rejected') => {
     try {
       setProcessingIds(prev => [...prev, userId]);
-      await axios.put(`http://localhost:5000/api/requests/${broadcastId}/${userId}`, { status });
+      await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/requests/${broadcastId}/${userId}`, { status });
     } catch (error) {
       console.error('Error handling request:', error);
     } finally {

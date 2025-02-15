@@ -2,7 +2,7 @@ import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { doc, setDoc, onSnapshot, collection } from "firebase/firestore";
 import { app, auth, db } from '../firebase'; // Import from your existing firebase.ts
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const NotificationService = {
   getMessaging() {

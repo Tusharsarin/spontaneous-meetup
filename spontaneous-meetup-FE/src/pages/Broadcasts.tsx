@@ -134,7 +134,7 @@ const Broadcasts = () => {
       const broadcast = broadcasts.find(b => b.id === broadcastId);
       if (!broadcast) return;
 
-      await axios.post(`http://localhost:5000/api/broadcasts/${broadcastId}/leave`, {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/broadcasts/${broadcastId}/leave`, {
         userId: user.uid
       });
 
@@ -157,7 +157,7 @@ const Broadcasts = () => {
       const broadcast = broadcasts.find(b => b.id === broadcastId);
       if (!broadcast) return;
 
-      await axios.delete(`http://localhost:5000/api/broadcasts/${broadcastId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/broadcasts/${broadcastId}`);
 
       // Notify all participants
       if (broadcast.participants?.length) {
