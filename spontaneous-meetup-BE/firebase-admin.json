@@ -1,13 +1,1 @@
-{
-  "type": "service_account",
-  "project_id": "spontaneous-meetup-ea432",
-  "private_key_id": "262d74c88a1e364ac7fd590f1844e67ce413b4f6",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC4bn9P1DwTx9wQ\nOBgSJrZUlDKpWgouBgqXX4XikCpK5I7VjKicnUxGfg9quS3VfO9jVcPKwz36uHVf\n1tWJeccPxXhFeyk5HscfwQpEwm38NAOia7s0HhDE6l5PIldhUifZvkTy1rk+6U2F\nc9VWW9ZMQDavrxy1pIvpZNtJuIjk26DCmn3qrT1Ql8AdMGQasmASAwaAP7Fjqqs5\nxIzxj4EwwgD4pedVMSEAa2LhyHEgejg5M7psMp5VPUh4mvm15tmGeh9IbKalRovw\n9ONPR3TIMIlmGfINOyWmTfTqIUc9Qjd3wyAiVmrOeobgdi1bCFe/j+MW3z4b3qSR\n3gicdIMNAgMBAAECggEAAI8f26zCXIen5x9Zvf8CtnxB2w7m0P+RBfxyz3Otwnmx\nj9F+rAWItv39gKP8Zj/xXypiDuSgn3idAnldlFkbfV9qiethqJwAm9wInUS+80Ya\nbLee4v2PAh8jwgxR732W7qtg/Mt3LEr7bS14tsD4g//91R0sHRuD67qJNPlWO5Cy\n5AGKgTKk4ADdC0fmEeH1V/WzdD62Ki+nG0FBYsmRHfcog8PcWeCLUD6oay6kqlAa\n3cUlFNViDhqOWvqVaXWstWWlxQ7XVNGluc++2mZC0U5UiE+v47w+NAGga54vSBrc\nOI3Dv9Q8U7QYovOy22WLbaFB7e3xQTJXbtBB3H9pEQKBgQDfg3Hmp1mf8HEeEzNV\n7rHVotDXRa16KMboi7Zm50HST6jnUt9oB+AahOW5OrxlcbvwnGDP1A2WkbXDkuEq\njRJFKZwiGAJpe6vIeJUKYA7z3GDWDfNhEg6taIeG3sopQpAAKmOY5RuZ+k7PMn4f\nNhB2IGfwlW4JJzOXgh3YvgsA3wKBgQDTPOJZUU85v9f3wlSoObXwxJ12mbagmMMr\nLLraY0bvDWoXmUPFOUN23KIED1fW6Cq4T359hYGF2RPQPCPUQg+jTc3hpi2aYQqZ\nNuhwzSQJNe350dq1zlTswJJWGuH8GkxtUa/jrqUjYILnS5qp8Og234+aNgKUj9HB\nsadDg25dkwKBgHpa1mtRiTqIwSOZlyyfcjJk4rY1qnWJBPogIUXLqriaavfW4f1s\n8j0SKz9u69sMm7lnoYejqZyXP01EhoZom2vJD3OKeSeNT8h6WfxIAWd1aH1FPcoR\nvH8pDafDJh/YFERC8CquoKF16NZ76ZbkXbaMntmQs5/HGfMCg5w2zIc5AoGAPaS1\n1STSPuMKLkYqmFEHFDT8UqD215Tc15udB6ATEi3S+QID8ekNFAG80fx8QL3Nwa2J\nFy4/pwS7MHhsaEPC9n/9Bc2N31BUXHPWjxx+WKXBRbcE4StOQyzLR49exUgTZ4+A\nCaxsio9ehArfHpqr2V+SM4lxZVM2/hRO4HfZXDsCgYEA1ixJnGulqq4TPB+zP5it\nWVfbS2ojbxKViy754B20MCAnBUOqw2jV9eK9oZfjcmbz2Ioxfi3l8rX8nIsWzY4E\ndn8R8l1Xs10FnAzU25L2A8W++jiN99l+iagyc1UR99+bWiF4EWFIuvkcRzpNJ4j1\nMVtNJOPFHTW0ynKnONxafys=\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-fbsvc@spontaneous-meetup-ea432.iam.gserviceaccount.com",
-  "client_id": "100588595033746970840",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40spontaneous-meetup-ea432.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
+
